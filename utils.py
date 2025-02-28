@@ -39,7 +39,7 @@ def create_combo_chart(df: pd.DataFrame) -> go.Figure:
             y=df['Investment'],
             name='Investment',
             marker_color='#2ecc71',
-            width=24 * 60 * 60 * 1000  # Set bar width to approximately 1 day in milliseconds
+            width=15 * 24 * 60 * 60 * 1000  # Set bar width to approximately 15 days in milliseconds
         )
     )
 
