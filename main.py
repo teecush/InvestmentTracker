@@ -116,19 +116,27 @@ if not st.session_state.transactions.empty:
     sorted_transactions = st.session_state.transactions.sort_values(
         by='Date',
         ascending=False
-    )
+    ).reset_index()  # Reset index for proper row deletion
 
-    # Display transaction table with formatting
-    displayed_transactions = sorted_transactions.copy()
-    displayed_transactions['Date'] = displayed_transactions['Date'].dt.strftime('%d/%m/%Y')
+    # Display transaction table with formatting and delete buttons
+    for idx, row in sorted_transactions.iterrows():
+        col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 2, 3, 1])
 
-    st.dataframe(
-        displayed_transactions.style.format({
-            'Investment': '${:,.2f}',
-            'Total Balance': '${:,.2f}'
-        }),
-        use_container_width=True
-    )
+        with col1:
+            st.write(row['Date'].strftime('%d/%m/%Y'))
+        with col2:
+            st.write(format_currency(row['Investment']))
+        with col3:
+            st.write(format_currency(row['Total Balance']))
+        with col4:
+            st.write(row['Account Type'])
+        with col5:
+            st.write(row['Notes'] if pd.notna(row['Notes']) else '')
+        with col6:
+            if st.button('🗑️', key=f'delete_{idx}'):
+                st.session_state.transactions = st.session_state.transactions.drop(row['index']).reset_index(drop=True)
+                st.rerun()
+
 else:
     st.info("No transactions yet. Add your first transaction using the sidebar!")
 
