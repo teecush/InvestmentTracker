@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
-from utils import calculate_metrics, create_combo_chart, validate_input
+from utils import calculate_metrics, create_combo_chart, validate_input, import_csv_data
 from styles import apply_custom_styles, format_currency
 
 # Page configuration
@@ -68,6 +68,14 @@ with st.sidebar:
     # CSV Upload
     st.sidebar.markdown("---")
     st.sidebar.header("Import Data")
+    st.sidebar.markdown("""
+    Upload a CSV file with the following columns:
+    - Date (DD/MM/YYYY)
+    - Investment (numeric)
+    - Total Balance (numeric)
+    - Account Type
+    - Notes
+    """)
     uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=['csv'])
 
     if uploaded_file is not None:
@@ -91,30 +99,10 @@ with st.sidebar:
             except UnicodeDecodeError:
                 st.sidebar.error("Could not read the file. Please ensure it's a properly formatted CSV file.")
             except Exception as e:
-                st.sidebar.error(f"Error importing data: {str(e)}\nPlease ensure your CSV file has these columns: Date, Investment, Total Balance, Account Type, Notes")
+                st.sidebar.error(f"Error importing data: {str(e)}")
 
         except Exception as e:
             st.sidebar.error(f"Error importing data: {str(e)}")
-
-
-def import_csv_data(csv_content):
-    try:
-        df = pd.read_csv(pd.compat.StringIO(csv_content))
-        #Basic data type validation.  More robust validation would be needed in a production system.
-        for col in ['Date', 'Investment', 'Total Balance']:
-            if df[col].dtype != 'object' and df[col].dtype != 'float64' and df[col].dtype != 'int64':
-                raise ValueError(f"Column '{col}' has an unexpected data type.")
-        df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
-        return df
-    except pd.errors.EmptyDataError:
-        raise ValueError("CSV file is empty.")
-    except pd.errors.ParserError:
-        raise ValueError("Error parsing CSV file. Please check the file format.")
-    except KeyError as e:
-        raise ValueError(f"Missing column in CSV file: {e}")
-    except ValueError as e:
-        raise
-
 
 # Main content area
 if not st.session_state.transactions.empty:
@@ -189,3 +177,21 @@ st.markdown(
     "💡 Track your investments across different account types and visualize your "
     "portfolio growth over time."
 )
+
+def import_csv_data(csv_content):
+    try:
+        df = pd.read_csv(pd.compat.StringIO(csv_content))
+        #Basic data type validation.  More robust validation would be needed in a production system.
+        for col in ['Date', 'Investment', 'Total Balance']:
+            if df[col].dtype != 'object' and df[col].dtype != 'float64' and df[col].dtype != 'int64':
+                raise ValueError(f"Column '{col}' has an unexpected data type.")
+        df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+        return df
+    except pd.errors.EmptyDataError:
+        raise ValueError("CSV file is empty.")
+    except pd.errors.ParserError:
+        raise ValueError("Error parsing CSV file. Please check the file format.")
+    except KeyError as e:
+        raise ValueError(f"Missing column in CSV file: {e}")
+    except ValueError as e:
+        raise

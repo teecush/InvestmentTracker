@@ -99,16 +99,39 @@ def import_csv_data(file_content: str) -> pd.DataFrame:
         # Create DataFrame from CSV content
         df = pd.read_csv(StringIO(file_content))
 
-        # Convert date strings to datetime objects
-        df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
+        # Verify required columns exist
+        required_columns = ['Date', 'Investment', 'Total Balance', 'Account Type', 'Notes']
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise ValueError(f"Missing required columns: {', '.join(missing_columns)}")
 
-        # Ensure numeric columns
-        df['Investment'] = pd.to_numeric(df['Investment'].str.replace('$', '').str.replace(',', ''), errors='coerce')
-        df['Total Balance'] = pd.to_numeric(df['Total Balance'].str.replace('$', '').str.replace(',', ''), errors='coerce')
+        # Convert date strings to datetime objects
+        try:
+            df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
+        except ValueError:
+            raise ValueError("Date format should be DD/MM/YYYY")
+
+        # Clean currency strings and convert to numeric
+        for col in ['Investment', 'Total Balance']:
+            df[col] = df[col].astype(str).str.replace('$', '').str.replace(',', '')
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+            if df[col].isna().any():
+                raise ValueError(f"Invalid numeric values found in {col} column")
 
         # Fill NaN values with 0 for Investment column
         df['Investment'] = df['Investment'].fillna(0)
 
+        # Validate Account Type values
+        valid_account_types = ["RSP", "FHSA", "TFSA", "Slush Fund", "1/4ly Statement", "-"]
+        invalid_types = df['Account Type'].unique().tolist()
+        invalid_types = [t for t in invalid_types if t not in valid_account_types]
+        if invalid_types:
+            raise ValueError(f"Invalid account types found: {', '.join(map(str, invalid_types))}")
+
         return df
+    except pd.errors.EmptyDataError:
+        raise ValueError("The CSV file is empty")
+    except pd.errors.ParserError:
+        raise ValueError("Error parsing CSV file. Please ensure it's properly formatted")
     except Exception as e:
         raise ValueError(f"Error importing CSV data: {str(e)}")
