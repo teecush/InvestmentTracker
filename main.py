@@ -23,6 +23,20 @@ if 'transactions' not in st.session_state:
 # Main title
 st.title("📊 Investment Portfolio Tracker")
 
+# Add download button for transactions
+if not st.session_state.transactions.empty:
+    # Create a copy of the dataframe with formatted date
+    download_df = st.session_state.transactions.copy()
+    download_df['Date'] = download_df['Date'].dt.strftime('%m/%d/%Y')
+
+    csv = download_df.to_csv(index=False)
+    st.download_button(
+        label="📥 Download Transactions Data",
+        data=csv,
+        file_name="investment_transactions.csv",
+        mime="text/csv",
+    )
+
 # Sidebar for adding new transactions
 with st.sidebar:
     st.header("Add New Transaction")
