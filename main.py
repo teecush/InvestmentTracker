@@ -3,6 +3,7 @@ import pandas as pd
 from datetime import datetime
 from utils import calculate_metrics, create_combo_chart, validate_input
 from styles import apply_custom_styles, format_currency
+import os
 
 # Page configuration
 st.set_page_config(
@@ -14,11 +15,21 @@ st.set_page_config(
 # Apply custom styles
 apply_custom_styles()
 
-# Initialize session state for data storage
+# File path for persistent storage
+DATA_FILE = "transactions.csv"
+
+# Initialize or load transactions data
 if 'transactions' not in st.session_state:
-    st.session_state.transactions = pd.DataFrame(
-        columns=['Date', 'Investment', 'Total Balance', 'Account Type', 'Notes']
-    )
+    if os.path.exists(DATA_FILE):
+        # Load existing data
+        df = pd.read_csv(DATA_FILE)
+        df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y')
+        st.session_state.transactions = df
+    else:
+        # Initialize empty DataFrame
+        st.session_state.transactions = pd.DataFrame(
+            columns=['Date', 'Investment', 'Total Balance', 'Account Type', 'Notes']
+        )
 
 # Main title
 st.title("📊 Investment Portfolio Tracker")
@@ -74,6 +85,12 @@ with st.sidebar:
                 [st.session_state.transactions, new_transaction],
                 ignore_index=True
             )
+
+            # Save to CSV file
+            save_df = st.session_state.transactions.copy()
+            save_df['Date'] = save_df['Date'].dt.strftime('%m/%d/%Y')
+            save_df.to_csv(DATA_FILE, index=False)
+
             st.success("Transaction added successfully!")
         else:
             st.error(message)
@@ -148,6 +165,10 @@ if not st.session_state.transactions.empty:
         with col6:
             if st.button('🗑️', key=f'delete_{idx}'):
                 st.session_state.transactions = st.session_state.transactions.drop(row['index']).reset_index(drop=True)
+                # Save to CSV file after deletion
+                save_df = st.session_state.transactions.copy()
+                save_df['Date'] = save_df['Date'].dt.strftime('%m/%d/%Y')
+                save_df.to_csv(DATA_FILE, index=False)
                 st.rerun()
 
 else:
