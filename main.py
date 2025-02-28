@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import plotly.graph_objects as go
 from datetime import datetime
 from utils import calculate_metrics, create_combo_chart, validate_input
 from styles import apply_custom_styles, format_currency
@@ -28,8 +27,8 @@ st.title("📊 Investment Portfolio Tracker")
 with st.sidebar:
     st.header("Add New Transaction")
 
-    # Convert date input to DD/MM/YYYY format
-    date_str = st.text_input("Date (DD/MM/YYYY)", datetime.today().strftime('%d/%m/%Y'))
+    # Convert date input to MM/DD/YYYY format
+    date_str = st.text_input("Date (MM/DD/YYYY)", datetime.today().strftime('%m/%d/%Y'))
     investment = st.number_input("Investment Amount", min_value=0.0, step=100.0)
     total_balance = st.number_input("Total Balance", min_value=0.0, step=100.0)
     account_type = st.selectbox(
@@ -48,7 +47,7 @@ with st.sidebar:
 
         if valid:
             # Convert date string to datetime object
-            date = datetime.strptime(date_str, '%d/%m/%Y')
+            date = datetime.strptime(date_str, '%m/%d/%Y')
             new_transaction = pd.DataFrame([{
                 'Date': date,
                 'Investment': investment,
@@ -123,7 +122,7 @@ if not st.session_state.transactions.empty:
         col1, col2, col3, col4, col5, col6 = st.columns([2, 2, 2, 2, 3, 1])
 
         with col1:
-            st.write(row['Date'].strftime('%d/%m/%Y'))
+            st.write(row['Date'].strftime('%m/%d/%Y'))
         with col2:
             st.write(format_currency(row['Investment']))
         with col3:

@@ -64,7 +64,7 @@ def create_combo_chart(df: pd.DataFrame) -> go.Figure:
         height=500,
         xaxis=dict(
             type='date',
-            tickformat='%d/%m/%Y',  # Updated date format
+            tickformat='%m/%d/%Y',  # Updated date format
             tickangle=45,
             dtick='M1',  # Show tick for every month
             tickmode='auto',
@@ -77,9 +77,9 @@ def create_combo_chart(df: pd.DataFrame) -> go.Figure:
 def validate_input(date: str, amount: float, balance: float, account_type: str) -> Tuple[bool, str]:
     """Validate user input for new transactions"""
     try:
-        datetime.strptime(date, '%d/%m/%Y')
+        datetime.strptime(date, '%m/%d/%Y')
     except ValueError:
-        return False, "Invalid date format. Please use DD/MM/YYYY"
+        return False, "Invalid date format. Please use MM/DD/YYYY"
 
     if amount < 0:
         return False, "Investment amount cannot be negative"
