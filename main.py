@@ -65,6 +65,43 @@ with st.sidebar:
         else:
             st.error(message)
 
+    # CSV Upload
+    st.sidebar.markdown("---")
+    st.sidebar.header("Import Data")
+    uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=['csv'])
+
+    if uploaded_file is not None:
+        try:
+            # Read the uploaded file
+            csv_content = uploaded_file.getvalue().decode('utf-8')
+            imported_df = import_csv_data(csv_content)
+
+            # Update the session state with imported data
+            st.session_state.transactions = imported_df
+            st.sidebar.success("Data imported successfully!")
+        except Exception as e:
+            st.sidebar.error(f"Error importing data: {str(e)}")
+
+
+def import_csv_data(csv_content):
+    try:
+        df = pd.read_csv(pd.compat.StringIO(csv_content))
+        #Basic data type validation.  More robust validation would be needed in a production system.
+        for col in ['Date', 'Investment', 'Total Balance']:
+            if df[col].dtype != 'object' and df[col].dtype != 'float64' and df[col].dtype != 'int64':
+                raise ValueError(f"Column '{col}' has an unexpected data type.")
+        df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
+        return df
+    except pd.errors.EmptyDataError:
+        raise ValueError("CSV file is empty.")
+    except pd.errors.ParserError:
+        raise ValueError("Error parsing CSV file. Please check the file format.")
+    except KeyError as e:
+        raise ValueError(f"Missing column in CSV file: {e}")
+    except ValueError as e:
+        raise
+
+
 # Main content area
 if not st.session_state.transactions.empty:
     # Calculate metrics

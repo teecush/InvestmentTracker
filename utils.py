@@ -3,6 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 from datetime import datetime
 from typing import Tuple, Dict
+from io import StringIO
 
 def calculate_metrics(df: pd.DataFrame) -> Dict[str, float]:
     """Calculate key investment metrics"""
@@ -91,3 +92,23 @@ def validate_input(date: str, amount: float, balance: float, account_type: str) 
         return False, "Account type is required"
 
     return True, ""
+
+def import_csv_data(file_content: str) -> pd.DataFrame:
+    """Import data from CSV content string"""
+    try:
+        # Create DataFrame from CSV content
+        df = pd.read_csv(StringIO(file_content))
+
+        # Convert date strings to datetime objects
+        df['Date'] = pd.to_datetime(df['Date'], format='%d/%m/%Y')
+
+        # Ensure numeric columns
+        df['Investment'] = pd.to_numeric(df['Investment'].str.replace('$', '').str.replace(',', ''), errors='coerce')
+        df['Total Balance'] = pd.to_numeric(df['Total Balance'].str.replace('$', '').str.replace(',', ''), errors='coerce')
+
+        # Fill NaN values with 0 for Investment column
+        df['Investment'] = df['Investment'].fillna(0)
+
+        return df
+    except Exception as e:
+        raise ValueError(f"Error importing CSV data: {str(e)}")
