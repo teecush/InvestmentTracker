@@ -9,7 +9,7 @@ def calculate_metrics(df: pd.DataFrame) -> Dict[str, float]:
     total_invested = df['Investment'].sum()
     current_balance = df['Total Balance'].iloc[-1] if not df.empty else 0
     total_earnings = current_balance - total_invested
-    
+
     # Calculate months invested
     if not df.empty:
         start_date = pd.to_datetime(df['Date'].min())
@@ -77,17 +77,17 @@ def create_combo_chart(df: pd.DataFrame) -> go.Figure:
 def validate_input(date: str, amount: float, balance: float, account_type: str) -> Tuple[bool, str]:
     """Validate user input for new transactions"""
     try:
-        datetime.strptime(date, '%Y-%m-%d')
+        datetime.strptime(date, '%d/%m/%Y')
     except ValueError:
-        return False, "Invalid date format. Please use YYYY-MM-DD"
-    
+        return False, "Invalid date format. Please use DD/MM/YYYY"
+
     if amount < 0:
         return False, "Investment amount cannot be negative"
-    
+
     if balance < 0:
         return False, "Total balance cannot be negative"
-    
+
     if not account_type:
         return False, "Account type is required"
-    
+
     return True, ""
