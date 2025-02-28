@@ -69,12 +69,18 @@ with st.sidebar:
     st.sidebar.markdown("---")
     st.sidebar.header("Import Data")
     st.sidebar.markdown("""
-    Upload a CSV file with the following columns:
+    Upload a CSV file with these exact column names:
     - Date (DD/MM/YYYY)
-    - Investment (numeric)
-    - Total Balance (numeric)
-    - Account Type
-    - Notes
+    - Investment (numeric, e.g. 1000.00)
+    - Total Balance (numeric, e.g. 5000.00)
+    - Account Type (must be one of: RSP, FHSA, TFSA, Slush Fund, 1/4ly Statement, -)
+    - Notes (optional)
+
+    Example CSV format:
+    ```
+    Date,Investment,Total Balance,Account Type,Notes
+    27/02/2025,1000.00,5000.00,TFSA,Initial investment
+    ```
     """)
     uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=['csv'])
 
@@ -99,7 +105,14 @@ with st.sidebar:
             except UnicodeDecodeError:
                 st.sidebar.error("Could not read the file. Please ensure it's a properly formatted CSV file.")
             except Exception as e:
-                st.sidebar.error(f"Error importing data: {str(e)}")
+                st.sidebar.error(f"""Error importing data: {str(e)}
+
+Please ensure:
+1. Column names are exactly as shown above
+2. Date format is DD/MM/YYYY
+3. Account Type is one of the allowed values
+4. No special characters in numbers (except . and ,)
+                """)
 
         except Exception as e:
             st.sidebar.error(f"Error importing data: {str(e)}")
