@@ -73,12 +73,26 @@ with st.sidebar:
     if uploaded_file is not None:
         try:
             # Read the uploaded file
-            csv_content = uploaded_file.getvalue().decode('utf-8')
-            imported_df = import_csv_data(csv_content)
+            try:
+                csv_content = uploaded_file.getvalue().decode('utf-8')
+                st.sidebar.info("Processing your CSV file...")
 
-            # Update the session state with imported data
-            st.session_state.transactions = imported_df
-            st.sidebar.success("Data imported successfully!")
+                # Basic CSV structure validation
+                if ',' not in csv_content:
+                    raise ValueError("File does not appear to be a valid CSV (no commas found)")
+
+                imported_df = import_csv_data(csv_content)
+
+                if len(imported_df) > 0:
+                    st.session_state.transactions = imported_df
+                    st.sidebar.success(f"Successfully imported {len(imported_df)} transactions!")
+                else:
+                    st.sidebar.warning("The CSV file appears to be empty. Please check the file content.")
+            except UnicodeDecodeError:
+                st.sidebar.error("Could not read the file. Please ensure it's a properly formatted CSV file.")
+            except Exception as e:
+                st.sidebar.error(f"Error importing data: {str(e)}\nPlease ensure your CSV file has these columns: Date, Investment, Total Balance, Account Type, Notes")
+
         except Exception as e:
             st.sidebar.error(f"Error importing data: {str(e)}")
 
