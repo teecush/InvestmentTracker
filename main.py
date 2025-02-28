@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from datetime import datetime
-from utils import calculate_metrics, create_combo_chart, validate_input, import_csv_data
+from utils import calculate_metrics, create_combo_chart, validate_input
 from styles import apply_custom_styles, format_currency
 
 # Page configuration
@@ -64,58 +64,6 @@ with st.sidebar:
             st.success("Transaction added successfully!")
         else:
             st.error(message)
-
-    # CSV Upload
-    st.sidebar.markdown("---")
-    st.sidebar.header("Import Data")
-    st.sidebar.markdown("""
-    Upload a CSV file with these exact column names:
-    - Date (DD/MM/YYYY)
-    - Investment (numeric, e.g. 1000.00)
-    - Total Balance (numeric, e.g. 5000.00)
-    - Account Type (must be one of: RSP, FHSA, TFSA, Slush Fund, 1/4ly Statement, -)
-    - Notes (optional)
-
-    Example CSV format:
-    ```
-    Date,Investment,Total Balance,Account Type,Notes
-    27/02/2025,1000.00,5000.00,TFSA,Initial investment
-    ```
-    """)
-    uploaded_file = st.sidebar.file_uploader("Upload CSV file", type=['csv'])
-
-    if uploaded_file is not None:
-        try:
-            # Read the uploaded file
-            try:
-                csv_content = uploaded_file.getvalue().decode('utf-8')
-                st.sidebar.info("Processing your CSV file...")
-
-                # Basic CSV structure validation
-                if ',' not in csv_content:
-                    raise ValueError("File does not appear to be a valid CSV (no commas found)")
-
-                imported_df = import_csv_data(csv_content)
-
-                if len(imported_df) > 0:
-                    st.session_state.transactions = imported_df
-                    st.sidebar.success(f"Successfully imported {len(imported_df)} transactions!")
-                else:
-                    st.sidebar.warning("The CSV file appears to be empty. Please check the file content.")
-            except UnicodeDecodeError:
-                st.sidebar.error("Could not read the file. Please ensure it's a properly formatted CSV file.")
-            except Exception as e:
-                st.sidebar.error(f"""Error importing data: {str(e)}
-
-Please ensure:
-1. Column names are exactly as shown above
-2. Date format is DD/MM/YYYY
-3. Account Type is one of the allowed values
-4. No special characters in numbers (except . and ,)
-                """)
-
-        except Exception as e:
-            st.sidebar.error(f"Error importing data: {str(e)}")
 
 # Main content area
 if not st.session_state.transactions.empty:
@@ -190,21 +138,3 @@ st.markdown(
     "💡 Track your investments across different account types and visualize your "
     "portfolio growth over time."
 )
-
-def import_csv_data(csv_content):
-    try:
-        df = pd.read_csv(pd.compat.StringIO(csv_content))
-        #Basic data type validation.  More robust validation would be needed in a production system.
-        for col in ['Date', 'Investment', 'Total Balance']:
-            if df[col].dtype != 'object' and df[col].dtype != 'float64' and df[col].dtype != 'int64':
-                raise ValueError(f"Column '{col}' has an unexpected data type.")
-        df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d', errors='coerce')
-        return df
-    except pd.errors.EmptyDataError:
-        raise ValueError("CSV file is empty.")
-    except pd.errors.ParserError:
-        raise ValueError("Error parsing CSV file. Please check the file format.")
-    except KeyError as e:
-        raise ValueError(f"Missing column in CSV file: {e}")
-    except ValueError as e:
-        raise
