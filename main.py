@@ -32,7 +32,7 @@ if 'transactions' not in st.session_state:
         )
 
 # Main title
-st.title("📊 TeeCush Portfolio Tracker")
+st.title("📊 Investment Portfolio Tracker")
 
 # Add download button for transactions
 if not st.session_state.transactions.empty:
@@ -117,7 +117,7 @@ if not st.session_state.transactions.empty:
 
     with col3:
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value" style="color: #2ecc71;">{format_currency(metrics["total_earnings"])}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="metric-value">{format_currency(metrics["total_earnings"])}</div>', unsafe_allow_html=True)
         st.markdown('<div class="metric-label">Total Earnings</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
