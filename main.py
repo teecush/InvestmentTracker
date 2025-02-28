@@ -116,8 +116,11 @@ if not st.session_state.transactions.empty:
     )
     
     # Display transaction table with formatting
+    displayed_transactions = sorted_transactions.copy()
+    displayed_transactions['Date'] = displayed_transactions['Date'].dt.strftime('%d/%m/%Y')
+
     st.dataframe(
-        sorted_transactions.style.format({
+        displayed_transactions.style.format({
             'Investment': '${:,.2f}',
             'Total Balance': '${:,.2f}'
         }),

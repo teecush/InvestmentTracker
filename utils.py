@@ -64,8 +64,11 @@ def create_combo_chart(df: pd.DataFrame) -> go.Figure:
         height=500,
         xaxis=dict(
             type='date',
-            tickformat='%Y-%m-%d',
-            tickangle=45
+            tickformat='%d/%m/%Y',  # Updated date format
+            tickangle=45,
+            dtick='M1',  # Show tick for every month
+            tickmode='auto',
+            nticks=20  # Maximum number of ticks to show
         )
     )
 
