@@ -34,7 +34,7 @@ with st.sidebar:
     total_balance = st.number_input("Total Balance", min_value=0.0, step=100.0)
     account_type = st.selectbox(
         "Account Type",
-        options=["TFSA", "RSP", "Slush Fund"]
+        options=["RSP", "FHSA", "TFSA", "Slush Fund", "1/4ly Statement", "-"]
     )
     notes = st.text_area("Notes")
 
