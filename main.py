@@ -34,20 +34,6 @@ if 'transactions' not in st.session_state:
 # Main title
 st.title("📊 Investment Portfolio Tracker")
 
-# Add download button for transactions
-if not st.session_state.transactions.empty:
-    # Create a copy of the dataframe with formatted date
-    download_df = st.session_state.transactions.copy()
-    download_df['Date'] = download_df['Date'].dt.strftime('%m/%d/%Y')
-
-    csv = download_df.to_csv(index=False)
-    st.download_button(
-        label="📥 Download Transactions Data",
-        data=csv,
-        file_name="investment_transactions.csv",
-        mime="text/csv",
-    )
-
 # Sidebar for adding new transactions
 with st.sidebar:
     st.header("Add New Transaction")
@@ -170,6 +156,46 @@ if not st.session_state.transactions.empty:
                 save_df['Date'] = save_df['Date'].dt.strftime('%m/%d/%Y')
                 save_df.to_csv(DATA_FILE, index=False)
                 st.rerun()
+
+    # Data Import/Export section
+    st.subheader("Import/Export Data")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        # Download button
+        download_df = st.session_state.transactions.copy()
+        download_df['Date'] = download_df['Date'].dt.strftime('%m/%d/%Y')
+        csv = download_df.to_csv(index=False)
+        st.download_button(
+            label="📥 Download Transactions Data",
+            data=csv,
+            file_name="investment_transactions.csv",
+            mime="text/csv",
+        )
+
+    with col2:
+        # Upload button
+        uploaded_file = st.file_uploader("📤 Import Previous Data (CSV)", type="csv")
+        if uploaded_file is not None:
+            try:
+                imported_df = pd.read_csv(uploaded_file)
+                imported_df['Date'] = pd.to_datetime(imported_df['Date'], format='%m/%d/%Y')
+
+                # Combine with existing data
+                st.session_state.transactions = pd.concat(
+                    [st.session_state.transactions, imported_df],
+                    ignore_index=True
+                ).drop_duplicates()
+
+                # Sort and save
+                st.session_state.transactions = st.session_state.transactions.sort_values('Date')
+                save_df = st.session_state.transactions.copy()
+                save_df['Date'] = save_df['Date'].dt.strftime('%m/%d/%Y')
+                save_df.to_csv(DATA_FILE, index=False)
+                st.success("Data imported successfully!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error importing data: Please ensure the CSV file matches the expected format")
 
 else:
     st.info("No transactions yet. Add your first transaction using the sidebar!")
