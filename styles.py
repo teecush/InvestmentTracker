@@ -19,6 +19,11 @@ def apply_custom_styles():
             font-weight: bold;
             color: #1f77b4;
         }
+        .earnings-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2ecc71;  /* Green color for earnings */
+        }
         .metric-label {
             font-size: 14px;
             color: #666;

@@ -4,10 +4,11 @@ from datetime import datetime
 from utils import calculate_metrics, create_combo_chart, validate_input
 from styles import apply_custom_styles, format_currency
 import os
+from gsheets import load_data_from_sheet
 
 # Page configuration
 st.set_page_config(
-    page_title="Investment Tracker",
+    page_title="TeeCush Portfolio Tracker",
     page_icon="📈",
     layout="wide"
 )
@@ -15,71 +16,48 @@ st.set_page_config(
 # Apply custom styles
 apply_custom_styles()
 
-# File path for persistent storage
+# File path for persistent storage (as backup)
 DATA_FILE = "transactions.csv"
 
+# Google Sheet URL
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1kD7e6Naq9dEIF1BaIZIQ31G5k7F_jqXP6IZQ4ZxZcIM/edit?usp=sharing"
+
 # Initialize or load transactions data
-if 'transactions' not in st.session_state:
-    if os.path.exists(DATA_FILE):
-        # Load existing data
-        df = pd.read_csv(DATA_FILE)
-        df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y')
-        st.session_state.transactions = df
-    else:
-        # Initialize empty DataFrame
-        st.session_state.transactions = pd.DataFrame(
-            columns=['Date', 'Investment', 'Total Balance', 'Account Type', 'Notes']
-        )
+if 'transactions' not in st.session_state or st.button("🔄 Refresh Data"):
+    try:
+        # Try to load from Google Sheets
+        with st.spinner("Loading data from Google Sheets..."):
+            df = load_data_from_sheet()
+            if df is not None and not df.empty:
+                st.session_state.transactions = df
+                st.success("Data loaded successfully from Google Sheet!")
+                
+                # Save a backup to CSV file
+                save_df = df.copy()
+                save_df['Date'] = save_df['Date'].dt.strftime('%m/%d/%Y')
+                save_df.to_csv(DATA_FILE, index=False)
+            else:
+                raise Exception("Failed to load data from Google Sheet")
+    except Exception as e:
+        st.error(f"Error loading data from Google Sheets: {str(e)}")
+        # Fall back to local CSV if available
+        if os.path.exists(DATA_FILE):
+            df = pd.read_csv(DATA_FILE)
+            df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y')
+            st.session_state.transactions = df
+            st.warning("Loaded data from local backup. Google Sheets connection failed.")
+        else:
+            # Initialize empty DataFrame
+            st.session_state.transactions = pd.DataFrame(
+                columns=['Date', 'Investment', 'Total Balance', 'Account Type', 'Notes']
+            )
+            st.warning("Could not load data from Google Sheets or local backup. Starting with empty data.")
 
 # Main title
-st.title("📊 Investment Portfolio Tracker")
+st.title("📊 TeeCush Portfolio Tracker")
 
-# Sidebar for adding new transactions
-with st.sidebar:
-    st.header("Add New Transaction")
-
-    # Convert date input to MM/DD/YYYY format
-    date_str = st.text_input("Date (MM/DD/YYYY)", datetime.today().strftime('%m/%d/%Y'))
-    investment = st.number_input("Investment Amount", min_value=0.0, step=100.0)
-    total_balance = st.number_input("Total Balance", min_value=0.0, step=100.0)
-    account_type = st.selectbox(
-        "Account Type",
-        options=["RSP", "FHSA", "TFSA", "Slush Fund", "1/4ly Statement", "-"]
-    )
-    notes = st.text_area("Notes")
-
-    if st.button("Add Transaction"):
-        valid, message = validate_input(
-            date_str,
-            investment,
-            total_balance,
-            account_type
-        )
-
-        if valid:
-            # Convert date string to datetime object
-            date = datetime.strptime(date_str, '%m/%d/%Y')
-            new_transaction = pd.DataFrame([{
-                'Date': date,
-                'Investment': investment,
-                'Total Balance': total_balance,
-                'Account Type': account_type,
-                'Notes': notes
-            }])
-
-            st.session_state.transactions = pd.concat(
-                [st.session_state.transactions, new_transaction],
-                ignore_index=True
-            )
-
-            # Save to CSV file
-            save_df = st.session_state.transactions.copy()
-            save_df['Date'] = save_df['Date'].dt.strftime('%m/%d/%Y')
-            save_df.to_csv(DATA_FILE, index=False)
-
-            st.success("Transaction added successfully!")
-        else:
-            st.error(message)
+# Info about data source
+st.info("Data is being loaded directly from Google Sheets. Changes made in the connected spreadsheet will be reflected when you refresh the data.")
 
 # Main content area
 if not st.session_state.transactions.empty:
@@ -103,7 +81,7 @@ if not st.session_state.transactions.empty:
 
     with col3:
         st.markdown('<div class="metric-card">', unsafe_allow_html=True)
-        st.markdown(f'<div class="metric-value">{format_currency(metrics["total_earnings"])}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="earnings-value">{format_currency(metrics["total_earnings"])}</div>', unsafe_allow_html=True)
         st.markdown('<div class="metric-label">Total Earnings</div>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
