@@ -4,21 +4,33 @@ from datetime import datetime
 import pandas as pd
 from openai import OpenAI
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+# We'll get the API key from the app instead of environment variable
+def get_openai_client(api_key=None):
+    """
+    Creates and returns an OpenAI client with the given API key.
+    Falls back to environment variable if api_key is None.
+    """
+    if api_key:
+        return OpenAI(api_key=api_key)
+    else:
+        return OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-def generate_portfolio_insights(df: pd.DataFrame, metrics: dict) -> str:
+def generate_portfolio_insights(df: pd.DataFrame, metrics: dict, api_key=None) -> str:
     """
     Generate AI-powered insights about the investment portfolio.
     
     Args:
         df (pd.DataFrame): Transaction data
         metrics (dict): Portfolio metrics
+        api_key (str, optional): OpenAI API key to use
         
     Returns:
         str: AI-generated insights
     """
     try:
+        # Get OpenAI client with the provided API key
+        client = get_openai_client(api_key)
+        
         # Format transaction data into a readable format
         transactions_text = format_transactions_for_ai(df)
         

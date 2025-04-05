@@ -184,21 +184,48 @@ if not st.session_state.transactions.empty:
     st.markdown("---")
     st.header("🧠 AI Portfolio Insights")
     
+    # Initialize session state for API key if not present
+    if 'openai_api_key' not in st.session_state:
+        st.session_state.openai_api_key = ""
+    
+    # API Key input field (with password masking)
+    with st.expander("OpenAI API Key Settings"):
+        st.markdown("""
+        To generate AI insights, you'll need an OpenAI API key. Your key is stored only in your browser session and never saved on the server.
+        
+        **How to get a key:**
+        1. Go to [OpenAI's website](https://platform.openai.com/api-keys)
+        2. Sign up or log in
+        3. Create a new API key
+        """)
+        api_key = st.text_input("Enter your OpenAI API key", 
+                                value=st.session_state.openai_api_key,
+                                type="password",
+                                help="Starts with 'sk-'")
+        
+        # Save to session state when changed
+        if api_key != st.session_state.openai_api_key:
+            st.session_state.openai_api_key = api_key
+    
     # Add a button to generate insights (to avoid unnecessary API calls)
     if st.button("✨ Generate AI Insights"):
-        with st.spinner("Analyzing your portfolio data..."):
-            try:
-                # Get insights from OpenAI
-                insights = generate_portfolio_insights(
-                    st.session_state.transactions,
-                    metrics
-                )
-                
-                # Display insights in a nice looking container
-                st.markdown(f'<div class="insights-container">{insights}</div>', unsafe_allow_html=True)
-                
-            except Exception as e:
-                st.error(f"Error generating insights: {str(e)}")
+        if not st.session_state.openai_api_key:
+            st.warning("Please enter your OpenAI API key in the settings above to generate insights.")
+        else:
+            with st.spinner("Analyzing your portfolio data..."):
+                try:
+                    # Get insights from OpenAI using the provided API key
+                    insights = generate_portfolio_insights(
+                        st.session_state.transactions,
+                        metrics,
+                        api_key=st.session_state.openai_api_key
+                    )
+                    
+                    # Display insights in a nice looking container
+                    st.markdown(f'<div class="insights-container">{insights}</div>', unsafe_allow_html=True)
+                    
+                except Exception as e:
+                    st.error(f"Error generating insights: {str(e)}")
     else:
         st.info("Click the button above to generate AI-powered insights about your investment portfolio.")
 
