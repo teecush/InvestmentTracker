@@ -5,6 +5,7 @@ from utils import calculate_metrics, create_combo_chart, validate_input
 from styles import apply_custom_styles, format_currency
 import os
 from gsheets import load_data_from_sheet
+from ai_insights import generate_portfolio_insights
 
 # Page configuration
 st.set_page_config(
@@ -177,6 +178,29 @@ if not st.session_state.transactions.empty:
 
 else:
     st.info("No transactions yet. Add your first transaction using the sidebar!")
+
+# AI Insights Section
+if not st.session_state.transactions.empty:
+    st.markdown("---")
+    st.header("🧠 AI Portfolio Insights")
+    
+    # Add a button to generate insights (to avoid unnecessary API calls)
+    if st.button("✨ Generate AI Insights"):
+        with st.spinner("Analyzing your portfolio data..."):
+            try:
+                # Get insights from OpenAI
+                insights = generate_portfolio_insights(
+                    st.session_state.transactions,
+                    metrics
+                )
+                
+                # Display insights in a nice looking container
+                st.markdown(f'<div class="insights-container">{insights}</div>', unsafe_allow_html=True)
+                
+            except Exception as e:
+                st.error(f"Error generating insights: {str(e)}")
+    else:
+        st.info("Click the button above to generate AI-powered insights about your investment portfolio.")
 
 # Footer
 st.markdown("---")

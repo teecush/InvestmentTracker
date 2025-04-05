@@ -31,6 +31,27 @@ def apply_custom_styles():
         .stDataFrame {
             font-size: 14px;
         }
+        /* AI Insights Styling */
+        .insights-container {
+            background-color: #f0f8ff;
+            border-radius: 10px;
+            padding: 1.2rem;
+            margin: 1rem 0;
+            border-left: 5px solid #4e89ae;
+        }
+        .stButton button {
+            background-color: #4e89ae;
+            color: white;
+            font-weight: bold;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        .stButton button:hover {
+            background-color: #3a6d8a;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
         </style>
     """, unsafe_allow_html=True)
 
