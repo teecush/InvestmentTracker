@@ -32,6 +32,12 @@ def process_sheet_data(df):
     Handles column naming, date formatting, and data type conversions.
     """
     try:
+        # Make a copy to avoid SettingWithCopyWarning
+        df = df.copy()
+        
+        # Print the column names for debugging
+        print(f"Original columns: {list(df.columns)}")
+        
         # Rename columns (assuming the sheet has headers)
         expected_columns = ['Date', 'Investment', 'Total Balance', 'Account Type', 'Notes']
         
@@ -40,13 +46,21 @@ def process_sheet_data(df):
             # Rename columns to match the expected format
             df.columns = expected_columns + list(df.columns[5:])
             
+            # Print first few rows for debugging
+            print("Sample data after column renaming:")
+            print(df.head())
+            
             # Convert date strings to datetime objects
             df['Date'] = pd.to_datetime(df['Date'], format='%m/%d/%Y', errors='coerce')
             
             # Drop rows with invalid dates
             df = df.dropna(subset=['Date'])
             
-            # Ensure numeric types for financial columns
+            # Clean financial columns (remove '$' and ',' characters)
+            df['Investment'] = df['Investment'].astype(str).str.replace('$', '', regex=False).str.replace(',', '', regex=False)
+            df['Total Balance'] = df['Total Balance'].astype(str).str.replace('$', '', regex=False).str.replace(',', '', regex=False)
+            
+            # Convert to numeric
             df['Investment'] = pd.to_numeric(df['Investment'], errors='coerce')
             df['Total Balance'] = pd.to_numeric(df['Total Balance'], errors='coerce')
             
@@ -56,6 +70,10 @@ def process_sheet_data(df):
             
             # Sort by date
             df = df.sort_values('Date')
+            
+            # Print sample of processed data
+            print("Processed data:")
+            print(df.head())
             
             return df
         else:

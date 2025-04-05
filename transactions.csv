@@ -1,11 +1,11 @@
 Date,Investment,Total Balance,Account Type,Notes
-12/03/2023,,,-,Initial Investment
-12/03/2023,,,Slush Fund,Initial Investment
-12/31/2023,,,1/4ly Statement,
-03/31/2024,,,1/4ly Statement,
-05/15/2024,,,RSP,"Opened TFSA and RSP, Trans full non slush fund to TFSA ($51,289.66)"
-06/30/2024,,,1/4ly Statement,
-09/30/2024,,,1/4ly Statement,
-10/02/2024,,,TFSA,
-12/31/2024,,,1/4ly Statement,
-02/18/2025,,,RSP,5k also transfered from Slush to RSP (so total 16k)
+12/03/2023,50000.0,50000.0,-,Initial Investment
+12/03/2023,10000.0,60000.0,Slush Fund,Initial Investment
+12/31/2023,,60969.0,1/4ly Statement,
+03/31/2024,,67529.0,1/4ly Statement,
+05/15/2024,5000.0,72529.0,RSP,"Opened TFSA and RSP, Trans full non slush fund to TFSA ($51,289.66)"
+06/30/2024,,73357.0,1/4ly Statement,
+09/30/2024,,76080.0,1/4ly Statement,
+10/02/2024,10000.0,86080.0,TFSA,
+12/31/2024,,87449.0,1/4ly Statement,
+02/18/2025,11000.0,100041.0,RSP,5k also transfered from Slush to RSP (so total 16k)
