@@ -65,3 +65,6 @@ uv.lock
 
 # Generated files
 generated-icon.png
+ 
+# Local machine state
+.local/
