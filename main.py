@@ -1,11 +1,20 @@
+"""
+Investment Portfolio Tracker
+A comprehensive Streamlit application for tracking and analyzing investment portfolios.
+
+Author: TeeCush Portfolio Tracker
+License: MIT
+"""
+
 import streamlit as st
 import pandas as pd
 from datetime import datetime
+import os
+
+# Local imports
 from utils import calculate_metrics, create_combo_chart, validate_input
 from styles import apply_custom_styles, format_currency
-import os
 from gsheets import load_data_from_sheet
-from ai_insights import generate_portfolio_insights
 from local_insights import generate_local_insights
 
 # Page configuration
@@ -21,7 +30,7 @@ apply_custom_styles()
 # File path for persistent storage (as backup)
 DATA_FILE = "transactions.csv"
 
-# Google Sheet URL
+# Google Sheet URL - Replace with your own publicly accessible Google Sheet
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1kD7e6Naq9dEIF1BaIZIQ31G5k7F_jqXP6IZQ4ZxZcIM/edit?usp=sharing"
 
 # Initialize or load transactions data
